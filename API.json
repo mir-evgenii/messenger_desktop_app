@@ -1,0 +1,10 @@
+{
+    "host":                 "http://localhost:",
+    "url":                  "/web/index.php?r={}/",
+    "port":                 "8080",
+    "add_client":           "add-client&key={}",
+    "get_online_clients":   "get-online-clients&keys={}",
+    "del_client":           "del-client&key={}",
+    "send_message":         "send-message&content={}&sender={}&recipient={}",
+    "get_messages":         "get-messages-for-client&key={}"
+}
