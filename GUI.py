@@ -3,6 +3,7 @@ import tkinter.messagebox
 
 from API import API
 from model import model
+from GUI_contacts import GUI_contacts
 
 class GUI:
 
@@ -169,7 +170,5 @@ class GUI:
         Создание окна управления контактами
         '''
 
-        self.add_contact_win = tkinter.Toplevel(self.root)
-        self.add_contact_win.title('Контакты')
-        self.add_contact_win.minsize(width=400,height=200)
+        GUI_contacts(self)
 
