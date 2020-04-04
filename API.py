@@ -33,21 +33,20 @@ class API:
         contacts_list = []
         for contact in contacts:
             if (contact[2] in online_contacts['online_users']):
-                contacts_list.append(contact[1] + ' (online)')
+                # + online
+                contacts_list.append('\u002B ' + contact[1])
             else:
-                contacts_list.append(contact[1] + ' (offline)')
+                # x offline
+                contacts_list.append('\u00D7 ' + contact[1])
 
         return contacts_list
 
-    def get_chat(self, cont='User 2 (offline)'):
+    def get_chat(self, cont):
 
         # перенести в демон для получения сообщений и запись в базу
         # response=requests.get(self.url.format('message') + self.api['get_messages'].format(self.key))
         # response=requests.get(self.url.format('message')+self.api['get_messages'].format('345'))
         # self.model.set_messages(json.loads(response.text))
-
-        # удаление online/offline из имени контакта
-        cont = ' '.join(cont.split()[0:-1])
 
         contact = self.model.get_contact(cont)
 
@@ -72,7 +71,6 @@ class API:
 
 
     def get_contact(self, cont):
-        # print(cont)
         return self.get_chat(cont)
 
     # добавить деструктор с выходом в оффлайн!!!

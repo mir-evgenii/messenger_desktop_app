@@ -2,19 +2,41 @@ import tkinter
 import tkinter.messagebox
 
 from API import API
+from model import model
 
 class GUI:
 
     def __init__(self):
 
+        self.readme = '''
+
+        Добро пожаловать!
+        ---------------------
+        Версия месседжера 0.1
+
+        В данной версии возможно отправлять сообщения.
+        Сообщения сохраняются в локальной базе данных.
+
+        Больше информации на сайте: http://....
+
+        '''
+
         # Создаем основное окно
         self.root = tkinter.Tk()
+        self.root.minsize(width=500,height=300)
+        self.root.geometry("750x500")
         self.root.title("Messenger")
 
         self.api = API()
+        self.model = model()
+
+        # При первом открытии мессенджера фрейма для ввода сообщения нет
+        # поскольку в меню не выбран контакт которому отправляем сообщение
+        # после выбора контакта появляется фрейм
+        self.send_message_frame_not_view = True
 
         # Создаем меню
-        #self.menu()
+        self.menu()
 
         # Создаем фрейм со списком контактов
         self.contact_frame()
@@ -25,17 +47,32 @@ class GUI:
         # Выводим основное окно
         self.root.mainloop()
 
+    def del_online_offline_simbol(self, contact):
+        '''
+        Удаление offline/online символа из имени контакта
+        '''
+        contact = ' '.join(contact.split()[1:])
+        return contact
+
+
     def send_message(self, event):
         '''
         Метод для отправки сообщения
         '''
 
+        contact = self.contact_listbox.get(self.contact_listbox.curselection())
+        # удаление online/offline из имени контакта
+        contact = self.del_online_offline_simbol(contact)
+
+        recipient = self.model.get_contact(contact)
+
         message = self.send_message_text.get("1.0", tkinter.END)
-        self.api.send_message(message)
+        self.api.send_message(message, int(recipient[2]))
         self.get_chat(event)
 
     def get_chat(self, event):
         contact = self.contact_listbox.get(self.contact_listbox.curselection())
+        contact = self.del_online_offline_simbol(contact)
         msgs = self.api.get_contact(contact)
         self.chat_text.destroy()
         self.chat_text = tkinter.Text(self.chat_frame, width=50, height=15, font="Arial 9")
@@ -45,6 +82,8 @@ class GUI:
         self.chat_text.yview(tkinter.END)
         self.chat_text.pack(expand=1, fill=tkinter.BOTH)
 
+        if (self.send_message_frame_not_view):
+            self.send_message_frame()
 
     def contact_frame(self):
         '''
@@ -66,7 +105,7 @@ class GUI:
     def parse_chat(self, chat_list):
         text_chat = ''
         for message in chat_list:
-            text_chat = text_chat + message[0] + ' : ' + message[1] + '\n'
+            text_chat = text_chat + message[0] + ':\n ' + message[1] + '\n'
         return text_chat
 
     def message_frame(self):
@@ -82,14 +121,15 @@ class GUI:
         self.chat_frame = tkinter.Frame(self.main_chat_frame)
         self.chat_frame.pack(expand=1, fill=tkinter.BOTH)
 
-        msgs = self.api.get_chat()
-
-        self.chat_text = tkinter.Text(self.chat_frame, width=50, height=15, font="Arial 9")
-        txt_msg = self.parse_chat(msgs)
-        self.chat_text.insert(tkinter.CURRENT, txt_msg)
+        self.chat_text = tkinter.Text(self.chat_frame, width=20, height=5, font="Arial 9")
+        self.chat_text.insert(tkinter.CURRENT, self.readme)
         self.chat_text.config(state=tkinter.DISABLED)
-        self.chat_text.yview(tkinter.END)
         self.chat_text.pack(expand=1, fill=tkinter.BOTH)
+
+    def send_message_frame(self):
+        '''
+        Метод для отображения поля ввода сообщения
+        '''
 
         # Создаем поле для ввода сообщения
         self.send_message_text_frame = tkinter.Frame(self.main_chat_frame)
@@ -107,20 +147,29 @@ class GUI:
         self.send_message_btn.bind("<Button-1>", self.send_message)
         self.send_message_btn.pack()
 
-    #def menu(self):
-    #    self.main_menu = tkinter.Menu(self.root)
-    #    self.root.config(menu=self.main_menu)
+        self.send_message_frame_not_view = False
 
-    #    fm = tkinter.Menu(self.main_menu) # создается пункт меню с размещением на основном меню (m)
-    #    self.main_menu.add_cascade(label="File",menu=fm) #пункту располагается на основном меню (m)
-    #    fm.add_command(label="Open...") #формируется список команд пункта меню
-    #    fm.add_command(label="New")
-    #    fm.add_command(label="Save...")
-    #    fm.add_command(label="Exit")
+    def menu(self):
+        self.main_menu = tkinter.Menu(self.root)
+        self.root.config(menu=self.main_menu)
 
-    #    hm = tkinter.Menu(self.main_menu) #второй пункт меню
-    #    self.main_menu.add_cascade(label="Help",menu=hm)
-    #    hm.add_command(label="Help")
-    #    hm.add_command(label="About")
+        fm = tkinter.Menu(self.main_menu, tearoff=0) # создается пункт меню с размещением на основном меню (m)
+        self.main_menu.add_cascade(label="\u2261",menu=fm) #пункту располагается на основном меню (m)
+        fm.add_command(label="Контакты", command=self.add_contact) #формируется список команд пункта меню
+        fm.add_command(label="Настройки")
+        fm.add_command(label="О программе")
 
+        #hm = tkinter.Menu(self.main_menu, tearoff=0) #второй пункт меню
+        #self.main_menu.add_cascade(label="Помощь",menu=hm)
+        #hm.add_command(label="Помощь")
+        #hm.add_command(label="О программе")
+
+    def add_contact(self):
+        '''
+        Создание окна управления контактами
+        '''
+
+        self.add_contact_win = tkinter.Toplevel(self.root)
+        self.add_contact_win.title('Контакты')
+        self.add_contact_win.minsize(width=400,height=200)
 
