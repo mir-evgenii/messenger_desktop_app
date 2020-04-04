@@ -3,6 +3,8 @@ import tkinter.messagebox
 
 class GUI_contacts:
 
+    # TODO при закрытии окна перезагружать основное окно мессенджера
+
     def __init__(self, gui):
 
         self.gui = gui
@@ -24,10 +26,18 @@ class GUI_contacts:
         self.contact_win.config(menu=self.tool_bar)
         self.tool_bar.add_command(label='\u002B', command=self.add_contact)
 
-    def contact_frame(self):
+    def contact_frame(self, reload_frame = False):
         '''
         Метод для отображения списка контактов
         '''
+
+        # TODO если выбрать контакт в главном окне мессенджера,
+        # а потом вызвать окно контактов (это окно) и в нем выбрать этот же контакт возникает Exception in Tkinter callback
+        # возможно связано с тем что этот класс использует обьект класса GUI
+
+        if (reload_frame):
+            self.contacts_frame.destroy()
+            self.contacts_info_frame.destroy()
 
         # Создаем фрейм для списка контактов
         self.contacts_frame = tkinter.Frame(self.contact_win)
@@ -59,9 +69,11 @@ class GUI_contacts:
 
         self.contact_info_frame()
 
-    def contact_info_frame(self):
+    def contact_info_frame(self, edit = True):
         '''
         Метод для создания фрейма просмотра, редактирования и удаления информации о контакте
+
+        если edit = True значит мы редактируем запись из базы, а если False значит создаем новую
         '''
 
         self.contacts_info_frame.destroy()
@@ -78,7 +90,8 @@ class GUI_contacts:
         self.contact_name_lable.pack()
 
         self.contact_name_entry = tkinter.Entry(self.contact_name_frame, width=30, font="Arial 9")
-        self.contact_name_entry.insert(0, self.contact[1])
+        if (edit):
+            self.contact_name_entry.insert(0, self.contact[1])
         self.contact_name_entry.pack()
 
         # Поле ввода ключа контакта
@@ -89,7 +102,8 @@ class GUI_contacts:
         self.contact_key_lable.pack()
 
         self.contact_key_entry = tkinter.Text(self.contact_key_frame, width=30, height=5, font="Arial 9")
-        self.contact_key_entry.insert(tkinter.CURRENT, self.contact[2])
+        if (edit):
+            self.contact_key_entry.insert(tkinter.CURRENT, self.contact[2])
         self.contact_key_entry.pack()
 
         # Кнопки сохранить и удалить
@@ -97,12 +111,25 @@ class GUI_contacts:
         self.contact_button_frame.pack()
 
         self.contact_save_button = tkinter.Button(self.contact_button_frame, text='\u2713', font="Arial 9")
-        self.contact_save_button.bind("<Button-1>", self.save_contact)
+        if (edit):
+            self.contact_save_button.bind("<Button-1>", self.save_contact)
+        else:
+            self.contact_save_button.bind("<Button-1>", self.save_new_contact)
         self.contact_save_button.pack(side=tkinter.LEFT)
 
-        self.contact_save_button = tkinter.Button(self.contact_button_frame, text='\u2715', font="Arial 9")
-        self.contact_save_button.bind("<Button-1>", self.del_contact)
-        self.contact_save_button.pack(side=tkinter.LEFT)
+        if (edit):
+            self.contact_save_button = tkinter.Button(self.contact_button_frame, text='\u2715', font="Arial 9")
+            self.contact_save_button.bind("<Button-1>", self.del_contact)
+            self.contact_save_button.pack(side=tkinter.LEFT)
+
+    def save_new_contact(self, event):
+
+        name = self.contact_name_entry.get()
+        key  = self.contact_key_entry.get("1.0", tkinter.END)
+
+        self.gui.model.add_contact(name, key)
+
+        self.contact_frame(True)
 
     def save_contact(self, event):
         print('save')
@@ -111,5 +138,5 @@ class GUI_contacts:
         print('del')
 
     def add_contact(self):
-        print('add')
+        self.contact_info_frame(False)
 

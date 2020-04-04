@@ -41,6 +41,16 @@ class model:
         self.cursor.execute(sql)
         return self.cursor.fetchone()
 
+    def edit_contact(self, contact_id, name, key):
+        pass
 
+    def del_contact(self, contact_id):
+        pass
+
+    def add_contact(self, name, key):
+
+        sql = "INSERT INTO contacts VALUES (null, '{}', '{}', null)".format(name, key)
+        self.cursor.execute(sql)
+        self.conn.commit()
 
 
