@@ -21,6 +21,9 @@ class GUI_contacts:
 
         self.contact_frame()
 
+    def __del__(self):
+        self.gui.reload_win()
+
     def menu(self):
         self.tool_bar = tkinter.Menu(self.contact_win)
         self.contact_win.config(menu=self.tool_bar)
@@ -126,16 +129,22 @@ class GUI_contacts:
 
         name = self.contact_name_entry.get()
         key  = self.contact_key_entry.get("1.0", tkinter.END)
-
         self.gui.model.add_contact(name, key)
-
         self.contact_frame(True)
 
     def save_contact(self, event):
-        print('save')
+
+        name = self.contact_name_entry.get()
+        key  = self.contact_key_entry.get("1.0", tkinter.END)
+        self.gui.model.edit_contact(self.contact[0], name, key)
+        self.contact_frame(True)
+
 
     def del_contact(self, event):
-        print('del')
+
+        self.gui.model.del_contact(self.contact[0])
+        self.contact_frame(True)
+
 
     def add_contact(self):
         self.contact_info_frame(False)

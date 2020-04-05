@@ -42,10 +42,16 @@ class model:
         return self.cursor.fetchone()
 
     def edit_contact(self, contact_id, name, key):
-        pass
+
+        sql = "UPDATE contacts SET name = '{}', key = '{}' WHERE id = {}".format(name, key, contact_id)
+        self.cursor.execute(sql)
+        self.conn.commit()
 
     def del_contact(self, contact_id):
-        pass
+
+        sql = "DELETE FROM contacts WHERE id = {}".format(contact_id)
+        self.cursor.execute(sql)
+        self.conn.commit()
 
     def add_contact(self, name, key):
 

@@ -48,6 +48,11 @@ class GUI:
         # Выводим основное окно
         self.root.mainloop()
 
+    def reload_win(self):
+        self.contact_frame(True)
+        self.message_frame(True)
+        self.send_message_frame_not_view = True
+
     def del_online_offline_simbol(self, contact):
         '''
         Удаление offline/online символа из имени контакта
@@ -86,10 +91,13 @@ class GUI:
         if (self.send_message_frame_not_view):
             self.send_message_frame()
 
-    def contact_frame(self):
+    def contact_frame(self, reload_frame = False):
         '''
         Метод для отображения списка контактов
         '''
+
+        if (reload_frame):
+            self.contacts_frame.destroy()
 
         # Создаем фрейм для списка контактов
         self.contacts_frame = tkinter.Frame(self.root)
@@ -109,10 +117,13 @@ class GUI:
             text_chat = text_chat + message[0] + ':\n ' + message[1] + '\n'
         return text_chat
 
-    def message_frame(self):
+    def message_frame(self, reload_frame = False):
         '''
         Метод для отображения фрейма чата
         '''
+
+        if (reload_frame):
+            self.main_chat_frame.destroy()
 
         # Создаем основной фрейм чата
         self.main_chat_frame = tkinter.Frame(self.root)
