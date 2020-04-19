@@ -8,12 +8,12 @@ class model:
         self.conn = sqlite3.connect("clientdb.db")
         self.cursor = self.conn.cursor()
 
-    def set_message(self, message, sender, recipient, time):
+    def set_message(self, message, sender, recipient, time, is_read = 0):
         '''
         Запись сообщения в базу
         '''
 
-        self.cursor.execute("INSERT INTO messages VALUES (null, '{}', '{}', '{}', '{}', '{}')".format(sender, recipient, message, time, datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")))
+        self.cursor.execute("INSERT INTO messages VALUES (null, '{}', '{}', '{}', '{}', '{}', {})".format(sender, recipient, message, time, datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S"), is_read))
 
         self.conn.commit()
 
@@ -21,13 +21,28 @@ class model:
 
         for message in messages['messages-for-client']:
             time = datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")
-            self.set_message(message['content'], message['sender'], message['recipient'], time)
+            self.set_message(message['content'], message['sender'], message['recipient'], time, 1)
 
     def get_messages(self, sender, recipient):
 
         sql = "SELECT * FROM messages WHERE sender={} AND recipient={}".format(str(sender), str(recipient))
         self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        result = self.cursor.fetchall()
+        self.conn.commit()
+
+        sql = "UPDATE messages SET is_read = 0 WHERE sender={} AND recipient={}".format(str(sender), str(recipient))
+        self.cursor.execute(sql)
+        self.conn.commit()
+
+        return result
+
+    def get_count_new_messages(self, recipient= False):
+        if (recipient):
+            sql = "SELECT count(*) FROM messages WHERE recipient={} AND is_read=1".format(str(recipient))
+        else:
+            sql = "SELECT count(*) FROM messages WHERE is_read=1"
+        self.cursor.execute(sql)
+        return self.cursor.fetchone()
 
     def get_contacts(self):
 

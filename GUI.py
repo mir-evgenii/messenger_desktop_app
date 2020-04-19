@@ -22,6 +22,8 @@ class GUI:
 
         '''
 
+        self.TIME_UPDATE = 5000 # частота обновления 5 секунд
+
         # Создаем основное окно
         self.root = tkinter.Tk()
         self.root.minsize(width=500,height=300)
@@ -49,7 +51,7 @@ class GUI:
         # Создаем фрейм с чатом
         self.message_frame()
 
-        self.root.after(5000, self.get_new_message)
+        self.root.after(self.TIME_UPDATE, self.get_new_message)
 
         # Выводим основное окно
         self.root.mainloop()
@@ -69,9 +71,8 @@ class GUI:
             self.contact_listbox.selection_set(contact_name)
             self.contact_listbox.activate(contact_name)
             contact_name = self.contact_listbox.curselection()
-            print (contact_name)
 
-        self.root.after(5000, self.get_new_message)
+        self.root.after(self.TIME_UPDATE, self.get_new_message)
 
     def reload_win(self):
         self.contact_frame(True)

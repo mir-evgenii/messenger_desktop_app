@@ -32,12 +32,20 @@ class API:
 
         contacts_list = []
         for contact in contacts:
+            count_new_messages = self.model.get_count_new_messages(contact[2])
+            count_new_messages = count_new_messages[0]
             if (contact[2] in online_contacts['online_users']):
                 # + online
-                contacts_list.append('\u002B ' + contact[1])
+                if (count_new_messages == 0):
+                    contacts_list.append('\u002B ' + contact[1])
+                else:
+                    contacts_list.append('\u002B{} '.format(count_new_messages) + contact[1])
             else:
                 # x offline
-                contacts_list.append('\u00D7 ' + contact[1])
+                if (count_new_messages == 0):
+                    contacts_list.append('\u00D7 ' + contact[1])
+                else:
+                    contacts_list.append('\u00D7{} '.format(count_new_messages) + contact[1])
 
         return contacts_list
 
