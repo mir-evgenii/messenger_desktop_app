@@ -36,6 +36,10 @@ class GUI:
         # после выбора контакта появляется фрейм
         self.send_message_frame_not_view = True
 
+        self.init_main_win()
+
+    def init_main_win(self):
+
         # Создаем меню
         self.menu()
 
@@ -45,8 +49,29 @@ class GUI:
         # Создаем фрейм с чатом
         self.message_frame()
 
+        self.root.after(5000, self.get_new_message)
+
         # Выводим основное окно
         self.root.mainloop()
+
+    def get_new_message(self):
+
+        contact_name = self.contact_listbox.curselection()
+        if contact_name:
+            self.reload_chat()
+
+        self.contact_listbox.delete(0, tkinter.END)
+        contact_list = self.api.get_contact_list()
+        for contact in contact_list:
+            self.contact_listbox.insert(tkinter.END, contact)
+
+        if contact_name:
+            self.contact_listbox.selection_set(contact_name)
+            self.contact_listbox.activate(contact_name)
+            contact_name = self.contact_listbox.curselection()
+            print (contact_name)
+
+        self.root.after(5000, self.get_new_message)
 
     def reload_win(self):
         self.contact_frame(True)
@@ -77,6 +102,9 @@ class GUI:
         self.get_chat(event)
 
     def get_chat(self, event):
+        self.reload_chat()
+
+    def reload_chat(self):
         contact = self.contact_listbox.get(self.contact_listbox.curselection())
         contact = self.del_online_offline_simbol(contact)
         msgs = self.api.get_contact(contact)
@@ -138,6 +166,7 @@ class GUI:
         self.chat_text.config(state=tkinter.DISABLED)
         self.chat_text.pack(expand=1, fill=tkinter.BOTH)
 
+
     def send_message_frame(self):
         '''
         Метод для отображения поля ввода сообщения
@@ -165,16 +194,11 @@ class GUI:
         self.main_menu = tkinter.Menu(self.root)
         self.root.config(menu=self.main_menu)
 
-        fm = tkinter.Menu(self.main_menu, tearoff=0) # создается пункт меню с размещением на основном меню (m)
-        self.main_menu.add_cascade(label="\u2261",menu=fm) #пункту располагается на основном меню (m)
-        fm.add_command(label="Контакты", command=self.add_contact) #формируется список команд пункта меню
+        fm = tkinter.Menu(self.main_menu, tearoff=0)
+        self.main_menu.add_cascade(label="\u2261",menu=fm)
+        fm.add_command(label="Контакты", command=self.add_contact)
         fm.add_command(label="Настройки")
         fm.add_command(label="О программе")
-
-        #hm = tkinter.Menu(self.main_menu, tearoff=0) #второй пункт меню
-        #self.main_menu.add_cascade(label="Помощь",menu=hm)
-        #hm.add_command(label="Помощь")
-        #hm.add_command(label="О программе")
 
     def add_contact(self):
         '''
