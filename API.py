@@ -12,13 +12,16 @@ class API:
 
         self.api = json.load(open("API.json"))
         self.url = "{}{}{}".format(self.api['host'], self.api['port'], self.api['url'])
-        self.key = '123'
-        self.name = 'User 1'
+        self.conf = json.load(open("conf.json"))
+        self.key = self.conf['key']
+        self.name = self.conf['name']
 
         response=requests.get(self.url.format('client')+self.api['add_client'].format(self.key))
         #print(response.text)
 
     def get_contact_list(self):
+
+        self.get_messages()
 
         contacts = self.model.get_contacts()
 
@@ -49,26 +52,25 @@ class API:
 
         return contacts_list
 
-    def get_chat(self, cont):
+    def get_messages(self):
+        response = requests.get(self.url.format('message') + self.api['get_messages'].format(self.key))
+        self.model.set_messages(json.loads(response.text))
 
-        # перенести в демон для получения сообщений и запись в базу
-        # response=requests.get(self.url.format('message') + self.api['get_messages'].format(self.key))
-        # response=requests.get(self.url.format('message')+self.api['get_messages'].format('345'))
-        # self.model.set_messages(json.loads(response.text))
+    def get_chat(self, cont):
 
         contact = self.model.get_contact(cont)
 
-        messages = self.model.get_messages(self.key, contact[2])
+        messages = self.model.get_messages(contact[2])
 
         chat = []
         for message in messages:
             if (message[1] == self.key):
                 chat.append([self.name, message[3]])
             else:
-                chat.append([contact[2], message[3]])
+                chat.append([contact[1], message[3]])
         return chat
 
-    def send_message(self, message, recipient = '345'):
+    def send_message(self, message, recipient):
 
         response=requests.get(self.url.format('message') + self.api['send_message'].format(message, self.key, recipient))
         print(response.text)
@@ -81,8 +83,7 @@ class API:
     def get_contact(self, cont):
         return self.get_chat(cont)
 
-    # добавить деструктор с выходом в оффлайн!!!
+    def __del__(self):
+        response=requests.get(self.url.format('client')+self.api['del_client'].format(self.key))
+        print(response.text)
 
-    # def send_key(self):
-    #     response = requests.get('http://localhost/index.php?r=client/add-client&key=123', verify=False)
-    #     print(response.text)

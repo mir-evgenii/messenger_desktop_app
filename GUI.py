@@ -1,5 +1,6 @@
 import tkinter
 import tkinter.messagebox
+import json
 
 from API import API
 from model import model
@@ -24,11 +25,13 @@ class GUI:
 
         self.TIME_UPDATE = 5000 # частота обновления 5 секунд
 
+        self.conf = json.load(open("conf.json"))
+
         # Создаем основное окно
         self.root = tkinter.Tk()
         self.root.minsize(width=500,height=300)
         self.root.geometry("750x500")
-        self.root.title("Messenger")
+        self.root.title(self.conf['title'])
 
         self.api = API()
         self.model = model()
@@ -99,7 +102,10 @@ class GUI:
         recipient = self.model.get_contact(contact)
 
         message = self.send_message_text.get("1.0", tkinter.END)
-        self.api.send_message(message, int(recipient[2]))
+
+        self.send_message_text.delete("1.0", tkinter.END)
+
+        self.api.send_message(message.strip(), int(recipient[2]))
         self.get_chat(event)
 
     def get_chat(self, event):

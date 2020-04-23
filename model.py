@@ -19,26 +19,28 @@ class model:
 
     def set_messages(self, messages):
 
+        print(messages)
+
         for message in messages['messages-for-client']:
             time = datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")
             self.set_message(message['content'], message['sender'], message['recipient'], time, 1)
 
-    def get_messages(self, sender, recipient):
+    def get_messages(self, contact):
 
-        sql = "SELECT * FROM messages WHERE sender={} AND recipient={}".format(str(sender), str(recipient))
+        sql = "SELECT * FROM messages WHERE sender={} OR recipient={}".format(str(contact), str(contact))
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
         self.conn.commit()
 
-        sql = "UPDATE messages SET is_read = 0 WHERE sender={} AND recipient={}".format(str(sender), str(recipient))
+        sql = "UPDATE messages SET is_read = 0 WHERE sender={} OR recipient={}".format(str(contact), str(contact))
         self.cursor.execute(sql)
         self.conn.commit()
 
         return result
 
-    def get_count_new_messages(self, recipient= False):
-        if (recipient):
-            sql = "SELECT count(*) FROM messages WHERE recipient={} AND is_read=1".format(str(recipient))
+    def get_count_new_messages(self, sender = False):
+        if (sender):
+            sql = "SELECT count(*) FROM messages WHERE sender = {} AND is_read=1".format(str(sender))
         else:
             sql = "SELECT count(*) FROM messages WHERE is_read=1"
         self.cursor.execute(sql)
