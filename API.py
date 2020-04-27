@@ -3,21 +3,26 @@ import json
 import datetime
 
 from model import model
+from sign import sign
 
 class API:
 
     def __init__(self):
 
         self.model = model()
+        self.sign = sign()
 
         self.api = json.load(open("API.json"))
         self.url = "{}{}{}".format(self.api['host'], self.api['port'], self.api['url'])
         self.conf = json.load(open("conf.json"))
-        self.key = self.conf['key']
+
+        public_key = 'bob_public_rsa_key.pem'
+        self.key = open(public_key).read()
+        #self.key = self.conf['key']
         self.name = self.conf['name']
 
         response=requests.get(self.url.format('client')+self.api['add_client'].format(self.key))
-        #print(response.text)
+        print(response.text)
 
     def get_contact_list(self):
 
@@ -30,7 +35,7 @@ class API:
             keys = keys + contact[2] + ';'
 
         response=requests.get(self.url.format('client')+self.api['get_online_clients'].format(keys))
-        #print(response.text)
+        print(response.text)
         online_contacts = json.loads(response.text)
 
         contacts_list = []
@@ -54,6 +59,7 @@ class API:
 
     def get_messages(self):
         response = requests.get(self.url.format('message') + self.api['get_messages'].format(self.key))
+        print(response.text)
         self.model.set_messages(json.loads(response.text))
 
     def get_chat(self, cont):
@@ -72,13 +78,15 @@ class API:
 
     def send_message(self, message, recipient):
 
-        response=requests.get(self.url.format('message') + self.api['send_message'].format(message, self.key, recipient))
+        str_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+
+        #sign = self.sign.sign_message(str(str_datetime) + ' ' + message)
+        sign = self.sign.sign_message(message)
+
+        response=requests.get(self.url.format('message') + self.api['send_message'].format(message, self.key, recipient, str(str_datetime), sign))
         print(response.text)
 
-        time = datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")
-
         self.model.set_message(message, self.key, recipient, time)
-
 
     def get_contact(self, cont):
         return self.get_chat(cont)

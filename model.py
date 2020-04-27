@@ -8,12 +8,12 @@ class model:
         self.conn = sqlite3.connect("clientdb.db")
         self.cursor = self.conn.cursor()
 
-    def set_message(self, message, sender, recipient, time, is_read = 0):
+    def set_message(self, message, sender, recipient, timedate, sign, is_read = 0):
         '''
         Запись сообщения в базу
         '''
 
-        self.cursor.execute("INSERT INTO messages VALUES (null, '{}', '{}', '{}', '{}', '{}', {})".format(sender, recipient, message, time, datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S"), is_read))
+        self.cursor.execute("INSERT INTO messages VALUES (null, '{}', '{}', '{}', '{}', '{}', {})".format(sender, recipient, message, datetime, sign, is_read, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
         self.conn.commit()
 
@@ -23,7 +23,7 @@ class model:
 
         for message in messages['messages-for-client']:
             time = datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")
-            self.set_message(message['content'], message['sender'], message['recipient'], time, 1)
+            self.set_message(message['content'], message['sender'], message['recipient'], message['datetime'], message['sign'], 1)
 
     def get_messages(self, contact):
 
