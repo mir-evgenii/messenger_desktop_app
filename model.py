@@ -19,8 +19,6 @@ class model:
 
     def set_messages(self, messages):
 
-        print(messages)
-
         for message in messages['messages-for-client']:
             time = datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")
             self.set_message(message['content'], message['sender'], message['recipient'], message['datetime'], message['sign'], 1)

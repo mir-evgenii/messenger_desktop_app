@@ -1,6 +1,7 @@
 import requests
 import json
 import datetime
+import logging
 
 from model import model
 from sign import sign
@@ -13,16 +14,29 @@ class API:
         self.sign = sign()
 
         self.api = json.load(open("API.json"))
-        self.url = "{}{}{}".format(self.api['host'], self.api['port'], self.api['url'])
+        self.url = self.api['host'] + self.api['port']
         self.conf = json.load(open("conf.json"))
 
-        public_key = 'bob_public_rsa_key.pem'
-        self.key = open(public_key).read()
-        #self.key = self.conf['key']
+        self.key = self.conf['key']
         self.name = self.conf['name']
 
-        response=requests.get(self.url.format('client')+self.api['add_client'].format(self.key))
-        print(response.text)
+        # Настройка логирования
+        logging.basicConfig(filename="logs/app.log", filemode="w", level=logging.INFO)
+
+        self.online()
+
+    def online(self):
+        payload = {'key': self.key}
+        response=requests.get(self.url + self.api['add_client'], params = payload)
+        self.log_response(response)
+
+    def log_response(self, response):
+        if (response.status_code == 200):
+            logging.info('SUCCESS:\n request: {}\n response: {}\n'.format(response.url, response.text))
+        elif (response.status_code != 200):
+            logging.info('ERROR:\n request: {}\n response code: {}\n'.format(response.url, response.status_code))
+            exit()
+
 
     def get_contact_list(self):
 
@@ -34,8 +48,9 @@ class API:
         for contact in contacts:
             keys = keys + contact[2] + ';'
 
-        response=requests.get(self.url.format('client')+self.api['get_online_clients'].format(keys))
-        print(response.text)
+        payload = {'keys': keys}
+        response=requests.get(self.url + self.api['get_online_clients'], params = payload)
+        self.log_response(response)
         online_contacts = json.loads(response.text)
 
         contacts_list = []
@@ -58,8 +73,10 @@ class API:
         return contacts_list
 
     def get_messages(self):
-        response = requests.get(self.url.format('message') + self.api['get_messages'].format(self.key))
-        print(response.text)
+        payload = {'key': self.key}
+        response = requests.get(self.url + self.api['get_messages'], params = payload)
+        self.log_response(response)
+        online_contacts = json.loads(response.text)
         self.model.set_messages(json.loads(response.text))
 
     def get_chat(self, cont):
@@ -78,13 +95,15 @@ class API:
 
     def send_message(self, message, recipient):
 
-        str_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+        str_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         #sign = self.sign.sign_message(str(str_datetime) + ' ' + message)
         sign = self.sign.sign_message(message)
 
-        response=requests.get(self.url.format('message') + self.api['send_message'].format(message, self.key, recipient, str(str_datetime), sign))
-        print(response.text)
+        payload = {'message': message, 'key': self.key, 'recipient': recipient, 'date': datetime, 'sign': sign}
+
+        response=requests.get(self.url + self.api['send_message'], params = payload)
+        self.log_response(response)
 
         self.model.set_message(message, self.key, recipient, time)
 
@@ -92,6 +111,7 @@ class API:
         return self.get_chat(cont)
 
     def __del__(self):
-        response=requests.get(self.url.format('client')+self.api['del_client'].format(self.key))
-        print(response.text)
+        payload = {'key': self.key}
+        response=requests.get(self.url+self.api['del_client'], params = payload)
+        self.log_response(response)
 
