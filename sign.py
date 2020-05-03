@@ -1,3 +1,5 @@
+import hashlib
+import json
 from Cryptodome.Signature import pkcs1_15
 from Cryptodome.Hash import SHA256
 from Cryptodome.Hash import SHA
@@ -7,12 +9,13 @@ class sign:
 
     def __init__(self):
 
-        self.private_key = 'bob_private_rsa_key_pass.pem'
-        self.secret_code = 'qwe123'
+        self.conf = json.load(open("conf.json"))
+        self.private_key = self.conf['private_key']
+        self.secret_code = self.conf['secret_code']
 
     def sign_message(self, message):
 
-        response = bytes(message, encoding = 'utf-8')
+        response = hashlib.md5(message.encode('utf-8')).digest()
         key = RSA.import_key(open(self.private_key).read(), passphrase = self.secret_code)
         h = SHA256.new(response)
         signature = pkcs1_15.new(key).sign(h)
@@ -21,7 +24,7 @@ class sign:
 
     def verify_sign(self, message, sign, public_key):
 
-        response = bytes(message, encoding = 'utf-8')
+        response = hashlib.md5(message.encode('utf-8')).digest()
         key = RSA.import_key(public_key)
         h = SHA256.new(response)
         try:

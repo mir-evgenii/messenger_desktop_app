@@ -1,5 +1,7 @@
 {
     "title": "Msg Bob",
     "name": "Bob",
+    "private_key": "bob_private_rsa_key_pass.pem",
+    "secret_code": "qwe123",
     "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCgJ8sm2fCk2/TOMoTrExidFhckEdY6Mn5UB3THrtoNTNgR4gi7hLMJ8whqlYMhnFcLoKWm7UnspnvJAfsATk3xJ/5wHahjM1dofUrFOyEouprxNOzVJCHbbVdPAn/ZtbX7CXL4VLn7Ot3aAKNnyhSEuQl45MRQ7/auT36OwK2dqwIDAQAB"
 }

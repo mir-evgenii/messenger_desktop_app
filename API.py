@@ -95,17 +95,18 @@ class API:
 
     def send_message(self, message, recipient):
 
-        str_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        send_msg_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         #sign = self.sign.sign_message(str(str_datetime) + ' ' + message)
         sign = self.sign.sign_message(message)
 
-        payload = {'message': message, 'key': self.key, 'recipient': recipient, 'date': datetime, 'sign': sign}
+        payload = {'content': message, 'sender': self.key, 'recipient': recipient, 'date': send_msg_time, 'sign': sign}
 
         response=requests.get(self.url + self.api['send_message'], params = payload)
         self.log_response(response)
 
-        self.model.set_message(message, self.key, recipient, time)
+        # TODO добавить обработку события когда сообщение не было отправлено.
+        self.model.set_message(message, self.key, recipient, send_msg_time, sign)
 
     def get_contact(self, cont):
         return self.get_chat(cont)
