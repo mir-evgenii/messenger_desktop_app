@@ -105,7 +105,7 @@ class GUI:
 
         self.send_message_text.delete("1.0", tkinter.END)
 
-        self.api.send_message(message.strip(), int(recipient[2]))
+        self.api.send_message(message.strip(), recipient[2])
         self.get_chat(event)
 
     def get_chat(self, event):

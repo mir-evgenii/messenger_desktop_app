@@ -25,12 +25,12 @@ class model:
 
     def get_messages(self, contact):
 
-        sql = "SELECT * FROM messages WHERE sender={} OR recipient={}".format(str(contact), str(contact))
+        sql = "SELECT * FROM messages WHERE sender = '{}' OR recipient = '{}'".format(str(contact), str(contact))
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
         self.conn.commit()
 
-        sql = "UPDATE messages SET is_read = 0 WHERE sender={} OR recipient={}".format(str(contact), str(contact))
+        sql = "UPDATE messages SET is_read = 0 WHERE sender = '{}' OR recipient = '{}'".format(str(contact), str(contact))
         self.cursor.execute(sql)
         self.conn.commit()
 
@@ -38,9 +38,9 @@ class model:
 
     def get_count_new_messages(self, sender = False):
         if (sender):
-            sql = "SELECT count(*) FROM messages WHERE sender = {} AND is_read=1".format(str(sender))
+            sql = "SELECT count(*) FROM messages WHERE sender = '{}' AND is_read=1".format(str(sender))
         else:
-            sql = "SELECT count(*) FROM messages WHERE is_read=1"
+            sql = "SELECT count(*) FROM messages WHERE is_read = 1"
         self.cursor.execute(sql)
         return self.cursor.fetchone()
 
@@ -52,7 +52,7 @@ class model:
 
     def get_contact(self, name):
 
-        sql = "SELECT * FROM contacts WHERE name='{}'".format(name)
+        sql = "SELECT * FROM contacts WHERE name = '{}'".format(name)
         self.cursor.execute(sql)
         return self.cursor.fetchone()
 
